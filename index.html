@@ -16,7 +16,68 @@
 
     <div id="app"></div>
     <script type="module" src="src/main.js"></script>
+    <script src="./luxon.min.js"></script>
     <script src="./math.js"></script>
+    <script>
+      var DateTime = luxon.DateTime;
+      window.math.import({
+        timestamp: function (dateString) {
+          timestamp = 0;
+          // 如果 dateString 为空，返回当前时间戳
+          if (!dateString || dateString.trim() === '') {
+              return Math.floor(DateTime.now().toMillis()/1000).toString();
+          }
+
+          // 尝试解析为日期时间 + 相对时间
+          const dateTimeRegex = /^(?:(?<date>\d{4}-\d{2}-\d{2})(?:[T ](?<time>\d{2}:\d{2}:\d{2}))?(?:Z)?\s*)?(?<relativeTime>[+-]\d+[smhdw])?$/;
+          const match = dateString.match(dateTimeRegex);
+          if (match) {
+            const datePart = match[1];
+            const timePart = match[2] || '00:00:00';
+            const relativeTime = match[3];
+    
+            let dateTime;
+          if (datePart && timePart) {
+              dateTime = DateTime.fromISO(`${datePart}T${timePart}Z`);
+          } else {
+              dateTime = DateTime.now();
+          }
+            if (relativeTime) {
+                const [value, unit] = relativeTime.match(/([+-]?\d+)([smhdw])/).slice(1);
+                const numValue = parseInt(value, 10);
+    
+                let duration;
+                switch (unit) {
+                    case 's':
+                        duration = { seconds: numValue };
+                        break;
+                    case 'm':
+                        duration = { minutes: numValue };
+                        break;
+                    case 'h':
+                        duration = { hours: numValue };
+                        break;
+                    case 'd':
+                        duration = { days: numValue };
+                        break;
+                    case 'w':
+                        duration = { weeks: numValue };
+                        break;
+                    default:
+                        throw new Error('Invalid time unit');
+                }
+    
+                dateTime = dateTime.plus(duration);
+            }
+    
+            if (dateTime.isValid) {
+                return Math.floor(dateTime.toMillis()/1000).toString();
+            }
+          }
+          return "0";
+        }
+      })
+    </script>
 
     <!--<div id="editor" class="editor"></div>
     <script type="module" src="src/editor/index.js"></script>-->
