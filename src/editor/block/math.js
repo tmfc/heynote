@@ -87,7 +87,7 @@ function mathDeco(view) {
                         resultWidget = new MathResult(
                             math.format(result, {
                                 precision: 8,
-                                upperExp: 8,
+                                upperExp: 11,
                                 lowerExp: -6,
                             }),
                             math.format(result, {
