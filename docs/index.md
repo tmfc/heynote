@@ -33,6 +33,7 @@ Available for Mac, Windows, and Linux.
 ⌘ + Enter           Add new block below the current block
 ⌥ + Enter           Add new block before the current block
 ⌘ + Shift + Enter   Add new block at the end of the buffer
+⌘ + Shift + V       Add new block at the end of the buffer and paste content
 ⌥ + Shift + Enter   Add new block at the start of the buffer
 ⌘ + ⌥ + Enter       Split the current block at cursor position
 ⌘ + L               Change block language
@@ -49,6 +50,7 @@ Available for Mac, Windows, and Linux.
 Ctrl + Enter           Add new block below the current block
 Alt + Enter            Add new block before the current block
 Ctrl + Shift + Enter   Add new block at the end of the buffer
+Ctrl + Shift + V       Add new block at the end of the buffer and paste content
 Alt + Shift + Enter    Add new block at the start of the buffer
 Ctrl + Alt + Enter     Split the current block at cursor position
 Ctrl + L               Change block language

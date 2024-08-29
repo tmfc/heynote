@@ -113,6 +113,34 @@ export const addNewBlockAfterLast = (editor) => ({ state, dispatch }) => {
     return true;
 }
 
+export const addNewBlockFromClipboard = (editor) => ({ state, dispatch }) => {
+    if (state.readOnly)
+        return false
+
+    const block = getLastNoteBlock(state)
+    const delimText = getBlockDelimiter(editor.defaultBlockToken, editor.defaultBlockAutoDetect)
+
+    const result = navigator.clipboard.readText()
+        .then(text => {
+            console.log(text)
+            dispatch(state.update({
+                changes: {
+                    from: block.content.to,
+                    insert: delimText + text,
+                },
+                selection: EditorSelection.cursor(block.content.to + text.length + delimText.length)
+            }, {
+                scrollIntoView: true,
+                userEvent: "input",
+            }))
+        })
+        .catch(err => {
+            console.error('Failed to read clipboard contents: ', err);
+        });
+
+    return true;
+}
+
 export function changeLanguageTo(state, dispatch, block, language, auto) {
     if (state.readOnly)
         return false

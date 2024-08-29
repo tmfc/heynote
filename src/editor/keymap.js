@@ -7,7 +7,7 @@ import {
 import { 
     insertNewBlockAtCursor, 
     addNewBlockBeforeCurrent, addNewBlockAfterCurrent,
-    addNewBlockBeforeFirst, addNewBlockAfterLast,
+    addNewBlockBeforeFirst, addNewBlockAfterLast,addNewBlockFromClipboard,
     moveLineUp, moveLineDown, 
     selectAll, 
     gotoPreviousBlock, gotoNextBlock, 
@@ -50,6 +50,7 @@ export function heynoteKeymap(editor) {
         ["Shift-Tab", indentLess],
         ["Alt-Shift-Enter", addNewBlockBeforeFirst(editor)],
         ["Mod-Shift-Enter", addNewBlockAfterLast(editor)],
+        ["Mod-Shift-v", addNewBlockFromClipboard(editor)],
         ["Alt-Enter", addNewBlockBeforeCurrent(editor)],
         ["Mod-Enter", addNewBlockAfterCurrent(editor)],
         ["Mod-Alt-Enter", insertNewBlockAtCursor(editor)],

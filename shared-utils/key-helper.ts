@@ -6,6 +6,7 @@ export const keyHelpStr = (platform: string) => {
         [`${modChar} + Enter`, "Add new block below the current block"],
         [`${altChar} + Enter`, "Add new block before the current block"],
         [`${modChar} + Shift + Enter`, "Add new block at the end of the buffer"],
+        [`${modChar} + Shift + V`, "Add new block at the end of the buffer and paste content"],
         [`${altChar} + Shift + Enter`, "Add new block at the start of the buffer"],
         [`${modChar} + ${altChar} + Enter`, "Split the current block at cursor position"],
         [`${modChar} + L`, "Change block language"],
@@ -14,6 +15,7 @@ export const keyHelpStr = (platform: string) => {
         [`${modChar} + A`, "Select all text in a note block. Press again to select the whole buffer"],
         [`${modChar} + ${altChar} + Up/Down`, "Add additional cursor above/below"],
         [`${altChar} + Shift + F`, "Format block content (works for JSON, JavaScript, HTML, CSS and Markdown)"],
+        
     ]
 
     if (platform === "win32" || platform === "linux") {
