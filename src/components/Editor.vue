@@ -56,7 +56,6 @@
                 this.$emit("openLanguageSelector")
             })
             this.$refs.editor.addEventListener(TOGGLE_FILE_EVENT, (e) => {
-                console.log(e.detail.newFileIndex)
                 this.$emit("toggleFile", e.detail.newFileIndex)
             })
 

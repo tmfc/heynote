@@ -101,13 +101,20 @@ export class Buffer {
     }
 
     async toggle(oldIndex, newIndex) {
+        
         // 判断文件是否存在
         if (!jetpack.exists(this.filePath + newIndex)) {
-            // 如果文件不存在，则将文件内容置为空
-            jetpack.write(this.filePath + newIndex, '');
+            let defaultContent = '\n∞∞∞text-a\n'
+            // 如果文件不存在，则将文件内容置为默认内容
+            await jetpack.write(this.filePath + newIndex, defaultContent, {
+                atomic: true,
+                mode: '600',
+            });
         }
         await jetpack.copy(this.filePath, this.filePath + oldIndex, { overwrite: true })
-        await jetpack.copy(this.filePath + newIndex, this.filePath, { overwrite: true })
+        const content = await jetpack.read(this.filePath + newIndex, 'utf8')
+
+        this.onChange(content);
     }
 }
 
@@ -127,9 +134,9 @@ export function loadBuffer() {
     return buffer
 }
 
-export function toggleBuffer(oldIndex, newIndex) {
+export async function toggleBuffer(oldIndex, newIndex) {
     if(buffer) {
-        buffer.toggle(oldIndex, newIndex)
+        await buffer.toggle(oldIndex, newIndex)
     }
 }
 

@@ -357,7 +357,7 @@ ipcMain.handle('file:get-index', () => {
 
 ipcMain.handle('file:toggle', async (event, newFileIndex) => {
     let oldFileIndex = CONFIG.get("fileIndex") || 1;
-    toggleBuffer(oldFileIndex, newFileIndex);
+    await toggleBuffer(oldFileIndex, newFileIndex);
     CONFIG.set('fileIndex', newFileIndex);
     win?.webContents.send(FILE_TOGGLE_EVENT, newFileIndex)
 })

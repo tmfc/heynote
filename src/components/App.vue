@@ -83,7 +83,6 @@
             //     this.$refs.editor.focus()
             // },
             toggleFile(newFileIndex) {
-                console.log(newFileIndex)
                 if (newFileIndex === this.fileIndex) {
                     return
                 }
