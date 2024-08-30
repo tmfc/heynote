@@ -7,6 +7,7 @@
 
     export default {
         props: [
+            "fileIndex",
             "line", 
             "column", 
             "selectionSize",
@@ -67,6 +68,9 @@
 
 <template>
     <div :class="className">
+        <div class="status-block line-number clickable" @click="$emit('toggleFile')" title="Toggle File 1/2">
+            File <span class="num">{{ fileIndex }}</span>
+        </div>
         <div class="status-block line-number">
             Ln <span class="num">{{ line }}</span>
             Col <span class="num">{{ column }}</span>
@@ -99,6 +103,7 @@
         <div class="status-block theme clickable" @click="$emit('toggleTheme')" title="Toggle dark/light mode">
             <span :class="'icon ' + themeSetting"></span>
         </div>
+
         <div 
             @click="$emit('openSettings')"
             class="status-block settings clickable"

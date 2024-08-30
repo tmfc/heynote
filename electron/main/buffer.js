@@ -99,6 +99,16 @@ export class Buffer {
             this.watcher = null
         }
     }
+
+    async toggle(oldIndex, newIndex) {
+        // 判断文件是否存在
+        if (!jetpack.exists(this.filePath + newIndex)) {
+            // 如果文件不存在，则将文件内容置为空
+            jetpack.write(this.filePath + newIndex, '');
+        }
+        await jetpack.copy(this.filePath, this.filePath + oldIndex, { overwrite: true })
+        await jetpack.copy(this.filePath + newIndex, this.filePath, { overwrite: true })
+    }
 }
 
 
@@ -115,6 +125,13 @@ export function loadBuffer() {
         },
     })
     return buffer
+}
+
+export function toggleBuffer(oldIndex, newIndex) {
+    if(buffer) {
+        buffer.save()
+        buffer.toggle(oldIndex, newIndex)
+    }
 }
 
 ipcMain.handle('buffer-content:load', async () => {

@@ -178,6 +178,9 @@
             focus() {
                 this.editor.focus()
             },
+            save() {
+                window.heynote.buffer.save(this.editor.getContent())
+            }
         },
     }
 </script>

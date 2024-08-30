@@ -4,12 +4,12 @@ import { join } from 'node:path'
 import fs from "fs"
 
 import { menu, getTrayMenu } from './menu'
-import { WINDOW_CLOSE_EVENT, SETTINGS_CHANGE_EVENT } from '../constants';
+import { WINDOW_CLOSE_EVENT, SETTINGS_CHANGE_EVENT, FILE_TOGGLE_EVENT } from '../constants';
 import CONFIG from "../config"
 import { isDev, isLinux, isMac, isWindows } from '../detect-platform';
 import { initializeAutoUpdate, checkForUpdates } from './auto-update';
 import { fixElectronCors } from './cors';
-import { loadBuffer, contentSaved } from './buffer';
+import { loadBuffer, toggleBuffer, contentSaved } from './buffer';
 
 
 // The built directory structure
@@ -351,6 +351,12 @@ ipcMain.handle('dark-mode:get', () => nativeTheme.themeSource)
 // load buffer on app start
 loadBuffer()
 
+
+ipcMain.handle('file:toggle', async (event, oldFileIndex, newFileIndex) => {
+    // TODO: do toggle file
+    toggleBuffer(oldFileIndex, newFileIndex);
+    win?.webContents.send(FILE_TOGGLE_EVENT,  oldFileIndex, newFileIndex)
+})
 
 ipcMain.handle('settings:set', async (event, settings) => {
     if (settings.keymap !== CONFIG.get("settings.keymap")) {

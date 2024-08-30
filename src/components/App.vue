@@ -14,6 +14,7 @@
 
         data() {
             return {
+                fileIndex: 1,
                 line: 1,
                 column: 1,
                 selectionSize: 0,
@@ -29,7 +30,7 @@
             }
         },
 
-        mounted() {
+        mounted() {           
             window.heynote.themeMode.get().then((mode) => {
                 this.theme = mode.computed
                 this.themeSetting = mode.theme
@@ -43,6 +44,10 @@
                 }
             }
             onThemeChange(window.heynote.themeMode.initial)
+            window.heynote.onToggleFile((oldFileIndex, newFileIndex) => {
+                console.log("app on toggle callback" , oldFileIndex, newFileIndex)
+                this.fileIndex = newFileIndex
+            })
             window.heynote.themeMode.onChange(onThemeChange)
             window.heynote.onSettingsChange((settings) => {
                 this.settings = settings
@@ -62,6 +67,16 @@
             },
             closeSettings() {
                 this.showSettings = false
+                this.$refs.editor.focus()
+            },
+
+            toggleFile() {
+                console.log(this.$refs.editor)
+                this.$refs.editor.save()
+
+                let newFileIndex = (this.fileIndex % 3) + 1;
+                window.heynote.toggleFile(this.fileIndex, newFileIndex)
+                // this.fileIndex = newFileIndex
                 this.$refs.editor.focus()
             },
 
@@ -129,6 +144,7 @@
             @openLanguageSelector="openLanguageSelector"
         />
         <StatusBar 
+            :fileIndex="fileIndex"
             :line="line" 
             :column="column" 
             :selectionSize="selectionSize"
@@ -138,10 +154,11 @@
             :themeSetting="themeSetting"
             :autoUpdate="settings.autoUpdate"
             :allowBetaVersions="settings.allowBetaVersions"
+            @toggleFile="toggleFile"
             @toggleTheme="toggleTheme"
             @openLanguageSelector="openLanguageSelector"
             @formatCurrentBlock="formatCurrentBlock"
-            @openSettings="showSettings = true"
+            @openSettings="openSettings"
             class="status" 
         />
         <div class="overlay">
