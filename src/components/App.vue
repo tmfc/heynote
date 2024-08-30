@@ -31,6 +31,10 @@
         },
 
         mounted() {           
+            this.fileIndex = window.heynote.getFileIndex().then((fileIndex) => {
+                this.fileIndex = fileIndex;
+            })
+
             window.heynote.themeMode.get().then((mode) => {
                 this.theme = mode.computed
                 this.themeSetting = mode.theme

@@ -13,3 +13,4 @@ export const UPDATE_INSTALL_AND_RESTART = "auto-update:installAndRestart"
 export const UPDATE_CHECK_FOR_UPDATES = "auto-update:checkForUpdates"
 
 export const FILE_TOGGLE_EVENT = "file-toggle"
+export const FILE_GET_INDEX_EVENT = "file-get-index"
