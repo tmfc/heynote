@@ -102,13 +102,13 @@ const Heynote = {
         //ipcRenderer.on(WINDOW_CLOSE_EVENT, callback)
     },
 
-    toggleFile(oldFileIndex, newFileIndex) {
+    toggleFile(newFileIndex) {
         localStorage.setItem("fileIndex", newFileIndex)
-        ipcRenderer.send(FILE_TOGGLE_EVENT, oldFileIndex, newFileIndex)
+        ipcRenderer.send(FILE_TOGGLE_EVENT, newFileIndex)
     },
 
     onToggleFile(callback) {
-        ipcRenderer.on(FILE_TOGGLE_EVENT, (event, oldFileIndex, newFileIndex) => callback(oldFileIndex, newFileIndex))
+        ipcRenderer.on(FILE_TOGGLE_EVENT, (event, newFileIndex) => callback(newFileIndex))
     },
     getFileIndex() {
         ipcRenderer.on(FILE_GET_INDEX_EVENT, parseInt(localStorage.getItem("fileIndex") || "1"))

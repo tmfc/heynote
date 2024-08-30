@@ -129,7 +129,6 @@ export function loadBuffer() {
 
 export function toggleBuffer(oldIndex, newIndex) {
     if(buffer) {
-        buffer.save()
         buffer.toggle(oldIndex, newIndex)
     }
 }

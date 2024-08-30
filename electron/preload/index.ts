@@ -42,13 +42,12 @@ contextBridge.exposeInMainWorld("heynote", {
         ipcRenderer.on(WINDOW_CLOSE_EVENT, callback)
     },
 
-    toggleFile(oldFileIndex, newFileIndex) {
-        console.log("toggle file")
-        ipcRenderer.invoke("file:toggle", oldFileIndex, newFileIndex)
+    toggleFile(newFileIndex) {
+        ipcRenderer.invoke("file:toggle", newFileIndex)
     },
 
     onToggleFile(callback) {
-        ipcRenderer.on(FILE_TOGGLE_EVENT, (event, oldFileIndex, newFileIndex) => callback(oldFileIndex, newFileIndex))
+        ipcRenderer.on(FILE_TOGGLE_EVENT, (event, newFileIndex) => callback(newFileIndex))
     },
 
     async getFileIndex() {

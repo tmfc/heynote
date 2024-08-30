@@ -48,8 +48,8 @@
                 }
             }
             onThemeChange(window.heynote.themeMode.initial)
-            window.heynote.onToggleFile((oldFileIndex, newFileIndex) => {
-                console.log("app on toggle callback" , oldFileIndex, newFileIndex)
+            window.heynote.onToggleFile((newFileIndex) => {
+                console.log("app on toggle file callback:", newFileIndex)
                 this.fileIndex = newFileIndex
             })
             window.heynote.themeMode.onChange(onThemeChange)
@@ -74,13 +74,41 @@
                 this.$refs.editor.focus()
             },
 
-            toggleFile() {
-                console.log(this.$refs.editor)
-                this.$refs.editor.save()
+            // toggleFile() {
+            //     this.$refs.editor.save()
 
-                let newFileIndex = (this.fileIndex % 3) + 1;
-                window.heynote.toggleFile(this.fileIndex, newFileIndex)
-                // this.fileIndex = newFileIndex
+            //     let newFileIndex = (this.fileIndex % 3) + 1;
+            //     window.heynote.toggleFile(newFileIndex)
+            //     // this.fileIndex = newFileIndex
+            //     this.$refs.editor.focus()
+            // },
+            toggleFile(newFileIndex) {
+                console.log(newFileIndex)
+                if (newFileIndex === this.fileIndex) {
+                    return
+                }
+                if (newFileIndex == null) {
+                    newFileIndex = (this.fileIndex % 3) + 1;
+                }
+                this.$refs.editor.save()
+                window.heynote.toggleFile(newFileIndex)
+                this.$refs.editor.focus()
+            },
+
+            toggleLanguageSelector() {
+                this.showLanguageSelector = !this.showLanguageSelector
+                this.$refs.editor.focus()
+            },
+
+            changeLanguage(language) {
+                this.showLanguageSelector = false
+                this.$refs.editor.setLanguage(language)
+                this.$refs.editor.focus()
+            },
+
+            changeTheme(theme) {
+                this.$refs.editor.save()
+                window.heynote.themeMode.set(theme)
                 this.$refs.editor.focus()
             },
 
@@ -146,6 +174,7 @@
             class="editor"
             ref="editor"
             @openLanguageSelector="openLanguageSelector"
+            @toggleFile="toggleFile"
         />
         <StatusBar 
             :fileIndex="fileIndex"

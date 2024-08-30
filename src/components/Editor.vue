@@ -1,5 +1,5 @@
 <script>
-    import { HeynoteEditor, LANGUAGE_SELECTOR_EVENT } from '../editor/editor.js'
+    import { HeynoteEditor, LANGUAGE_SELECTOR_EVENT, TOGGLE_FILE_EVENT } from '../editor/editor.js'
     import { syntaxTree } from "@codemirror/language"
 
     export default {
@@ -54,6 +54,10 @@
 
             this.$refs.editor.addEventListener(LANGUAGE_SELECTOR_EVENT, (e) => {
                 this.$emit("openLanguageSelector")
+            })
+            this.$refs.editor.addEventListener(TOGGLE_FILE_EVENT, (e) => {
+                console.log(e.detail.newFileIndex)
+                this.$emit("toggleFile", e.detail.newFileIndex)
             })
 
             // load buffer content and create editor

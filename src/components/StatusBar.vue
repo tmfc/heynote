@@ -68,7 +68,7 @@
 
 <template>
     <div :class="className">
-        <div class="status-block line-number clickable" @click="$emit('toggleFile')" title="Toggle File 1/2">
+        <div class="status-block line-number clickable" @click="$emit('toggleFile')" title="Toggle File 1/2/3">
             File <span class="num">{{ fileIndex }}</span>
         </div>
         <div class="status-block line-number">

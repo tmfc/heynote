@@ -4,7 +4,7 @@ import { join } from 'node:path'
 import fs from "fs"
 
 import { menu, getTrayMenu } from './menu'
-import { WINDOW_CLOSE_EVENT, SETTINGS_CHANGE_EVENT, FILE_TOGGLE_EVENT, FILE_GET_INDEX_EVENT } from '../constants';
+import { WINDOW_CLOSE_EVENT, SETTINGS_CHANGE_EVENT, FILE_TOGGLE_EVENT } from '../constants';
 import CONFIG from "../config"
 import { isDev, isLinux, isMac, isWindows } from '../detect-platform';
 import { initializeAutoUpdate, checkForUpdates } from './auto-update';
@@ -355,10 +355,11 @@ ipcMain.handle('file:get-index', () => {
     return CONFIG.get("fileIndex");
 })
 
-ipcMain.handle('file:toggle', async (event, oldFileIndex, newFileIndex) => {
+ipcMain.handle('file:toggle', async (event, newFileIndex) => {
+    let oldFileIndex = CONFIG.get("fileIndex") || 1;
     toggleBuffer(oldFileIndex, newFileIndex);
     CONFIG.set('fileIndex', newFileIndex);
-    win?.webContents.send(FILE_TOGGLE_EVENT,  oldFileIndex, newFileIndex)
+    win?.webContents.send(FILE_TOGGLE_EVENT, newFileIndex)
 })
 
 ipcMain.handle('settings:set', async (event, settings) => {
