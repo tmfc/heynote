@@ -70,6 +70,5 @@ export function heynoteKeymap(editor) {
         ["Mod-1", () => editor.toggleFile(1)],
         ["Mod-2", () => editor.toggleFile(2)],
         ["Mod-3", () => editor.toggleFile(3)],
-        
     ])
 }

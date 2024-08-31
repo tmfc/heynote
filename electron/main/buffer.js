@@ -103,16 +103,18 @@ export class Buffer {
     async toggle(oldIndex, newIndex) {
         
         // 判断文件是否存在
-        if (!jetpack.exists(this.filePath + newIndex)) {
-            let defaultContent = '\n∞∞∞text-a\n'
+        const newFilePath = this.filePath.replace('.txt', `${newIndex}.txt`);
+        if (!jetpack.exists(newFilePath)) {
+            let defaultContent = '\n∞∞∞text-a\n';
             // 如果文件不存在，则将文件内容置为默认内容
-            await jetpack.write(this.filePath + newIndex, defaultContent, {
+            await jetpack.write(newFilePath, defaultContent, {
                 atomic: true,
                 mode: '600',
             });
         }
-        await jetpack.copy(this.filePath, this.filePath + oldIndex, { overwrite: true })
-        const content = await jetpack.read(this.filePath + newIndex, 'utf8')
+        const oldFilePath = this.filePath.replace('.txt', `${oldIndex}.txt`); 
+        await jetpack.copy(this.filePath, oldFilePath, { overwrite: true }); 
+        const content = await jetpack.read(newFilePath, 'utf8');
 
         this.onChange(content);
     }
@@ -171,19 +173,56 @@ ipcMain.handle("buffer-content:selectLocation", async () => {
             "createDirectory",
             "noResolveAliases",
         ],
-    })
+    });
     if (result.canceled) {
-        return
+        return;
     }
-    const filePath = result.filePaths[0]
-    if (fs.existsSync(constructBufferFilePath(filePath))) {
-        if (dialog.showMessageBoxSync({
-            type: "question",
-            message: "The selected directory already contains a buffer file. It will be loaded. Do you want to continue?",
-            buttons: ["Cancel", "Continue"],
-        }) === 0) {
-            return
+    const newDirectoryPath = result.filePaths[0];
+    const currentBufferDirectoryPath = dirname(getBufferFilePath());
+
+    // 获取当前缓冲区目录下的所有文件
+    const files = fs.readdirSync(currentBufferDirectoryPath);
+
+    // 记录用户的选择
+    let overwriteFiles = [];
+    let mergeFiles = [];
+
+    for (const file of files) {
+        const currentFilePath = join(currentBufferDirectoryPath, file);
+        const newFilePath = join(newDirectoryPath, file);
+
+        if (fs.existsSync(newFilePath)) {
+            overwriteFiles.push(file); // 记录需要覆盖的文件
+        } else {
+            // 如果没有同名文件，直接复制
+            await jetpack.copy(currentFilePath, newFilePath, { overwrite: true });
         }
     }
-    return filePath
-})
+
+    // 询问用户如何处理需要覆盖的文件
+    if (overwriteFiles.length > 0) {
+        const response = dialog.showMessageBoxSync({
+            type: "question",
+            message: `The following files already exist in the selected directory: ${overwriteFiles.join(', ')}. Do you want to overwrite them or merge their content?`,
+            buttons: ["Overwrite", "Merge", "Cancel"],
+        });
+
+        for (const file of overwriteFiles) {
+            const currentFilePath = join(currentBufferDirectoryPath, file);
+            const newFilePath = join(newDirectoryPath, file);
+
+            if (response === 0) {
+                // Overwrite the existing file
+                await jetpack.copy(currentFilePath, newFilePath, { overwrite: true });
+            } else if (response === 1) {
+                // Merge content
+                const existingContent = await jetpack.read(newFilePath, 'utf8');
+                const currentContent = await jetpack.read(currentFilePath, 'utf8');
+                const mergedContent = existingContent + '\n' + currentContent; // Example merge logic
+                await jetpack.write(newFilePath, mergedContent, { atomic: true });
+            }
+        }
+    }
+
+    return newDirectoryPath;
+});
