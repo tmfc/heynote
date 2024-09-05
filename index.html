@@ -42,8 +42,11 @@
             } else {
                 dateTime = DateTime.now();
             }
+            return dateTime.toMillis()/1000;
           }
-          return "0";
+          else {
+            return 0;
+          }
         },
         duration: function (timeUnit) {
           // 正则表达式匹配时间单位
