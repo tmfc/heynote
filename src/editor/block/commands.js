@@ -8,7 +8,7 @@ export { moveLineDown, moveLineUp, selectAll }
 
 
 function getBlockDelimiter(defaultToken, autoDetect) {
-    return `\n∞∞∞${autoDetect ? defaultToken + '-a' : defaultToken}\n`
+    return `\n∞∞∞${autoDetect ? defaultToken + '-a' : defaultToken};;;\n`
 }
 
 export const insertNewBlockAtCursor = (editor) => ({ state, dispatch }) => {
@@ -18,7 +18,7 @@ export const insertNewBlockAtCursor = (editor) => ({ state, dispatch }) => {
     const currentBlock = getActiveNoteBlock(state)
     let delimText;
     if (currentBlock) {
-        delimText = `\n∞∞∞${currentBlock.language.name}${currentBlock.language.auto ? "-a" : ""}\n`
+        delimText = `\n∞∞∞${currentBlock.language.name}${currentBlock.language.auto ? "-a" : ""};;;\n`
     } else {
         delimText = getBlockDelimiter(editor.defaultBlockToken, editor.defaultBlockAutoDetect)
     }

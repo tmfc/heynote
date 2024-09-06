@@ -4,11 +4,11 @@ import { keyHelpStr } from "../shared-utils/key-helper";
 export const eraseInitialContent = !!process.env.ERASE_INITIAL_CONTENT
 
 export const initialContent = `
-∞∞∞markdown
+∞∞∞markdown;;;
 Welcome to Heynote! 👋
 
 ${keyHelpStr(os.platform())}
-∞∞∞math
+∞∞∞math;;;
 This is a Math block. Here, rows are evaluated as math expressions. 
 
 radius = 5
@@ -22,21 +22,21 @@ time = 3900 seconds to minutes
 time * 2
 
 1 EUR in USD
-∞∞∞markdown
+∞∞∞markdown;;;
 In Markdown blocks, lists with [x] and [ ] are rendered as checkboxes:
 
 - [x] Download Heynote
 - [ ] Try out Heynote
-∞∞∞text-a
+∞∞∞text-a;;;
 `
 
 export const initialDevContent = initialContent + `
-∞∞∞python-a
+∞∞∞python-a;;;
 # hmm
 def my_func():
   print("hejsan")
 
-∞∞∞javascript-a
+∞∞∞javascript-a;;;
 import {basicSetup} from "codemirror"
 import {EditorView, keymap} from "@codemirror/view"
 import {javascript} from "@codemirror/lang-javascript"
@@ -66,7 +66,7 @@ let editor = new EditorView({
   ],
   parent: document.getElementById("editor"),
 })
-∞∞∞json
+∞∞∞json;;;
 {
     "name": "heynote-codemirror",
     "type": "module",
@@ -94,7 +94,7 @@ let editor = new EditorView({
         "typescript": "^4.9.4"
     }
 }
-∞∞∞html
+∞∞∞html;;;
 <html>
     <head>
         <title>Test</title>
@@ -106,9 +106,9 @@ let editor = new EditorView({
         </script>
     </body>
 </html>
-∞∞∞sql
+∞∞∞sql;;;
 SELECT * FROM table WHERE id = 1;
-∞∞∞text
+∞∞∞text;;;
 Shopping list:
 
 - Milk

@@ -8,7 +8,7 @@ const FIRST_TOKEN_CHAR = "\n".charCodeAt(0)
 const SECOND_TOKEN_CHAR = "∞".charCodeAt(0)
 
 const languageTokensMatcher = LANGUAGES.map(l => l.token).join("|")
-const tokenRegEx = new RegExp(`^\\n∞∞∞(${languageTokensMatcher})(-a)?\\n`, "g")
+const tokenRegEx = new RegExp(`^\\n∞∞∞(${languageTokensMatcher})(-a)?;;;(\\d+)?\\n`, "g")
 
 export const noteContent = new ExternalTokenizer((input) => {
     let current = input.peek(0);
@@ -23,7 +23,7 @@ export const noteContent = new ExternalTokenizer((input) => {
         // so we don't need to check for the rest of the token
         if (current === FIRST_TOKEN_CHAR && next === SECOND_TOKEN_CHAR) {
             let potentialLang = "";
-            for (let i=0; i<18; i++) {
+            for (let i=0; i<44; i++) {
                 potentialLang += String.fromCharCode(input.peek(i));
             }
             if (potentialLang.match(tokenRegEx)) {

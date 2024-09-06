@@ -27,6 +27,7 @@ let firstBlockDelimiterSize
  */
 export function getBlocksFromSyntaxTree(state) {
     //const timer = startTimer()
+    // console.log(state);
     const blocks = [];  
     const tree = syntaxTree(state, state.doc.length)
     if (tree) {
@@ -38,6 +39,8 @@ export function getBlocksFromSyntaxTree(state) {
                     const langNode = type.node.getChild("NoteLanguage")
                     const language = state.doc.sliceString(langNode.from, langNode.to)
                     const isAuto = !!type.node.getChild("Auto")
+                    const blockIdNode = type.node.getChild("BlockId")
+                    const blockId = state.doc.sliceString(blockIdNode.from, blockIdNode.to)
                     const contentNode = type.node.nextSibling
                     blocks.push({
                         language: {
@@ -56,6 +59,7 @@ export function getBlocksFromSyntaxTree(state) {
                             from: type.node.from,
                             to: contentNode.to,
                         },
+                        blockId: blockId
                     })
                     return false;
                 }
@@ -97,9 +101,16 @@ export function getBlocksFromString(state) {
             const langFull = content.substring(langStart, delimiterEnd);
             let auto = false;
             let lang = langFull;
-            if (langFull.endsWith("-a")) {
+            let blockId = ""; // 新增变量用于存储 block_id
+            const langParts = langFull.split(";;;"); // 分割语言和 block_id
+            lang = langParts[0]; // 获取语言
+            if (langParts.length > 1) {
+                blockId = langParts[1]; // 获取 block_id
+                
+            }
+            if (lang.endsWith("-a")) {
                 auto = true;
-                lang = langFull.substring(0, langFull.length - 2);
+                lang = lang.substring(0, lang.length - 2);
             }
             const contentFrom = delimiterEnd + 1;
             let blockEnd = content.indexOf(delim, contentFrom);
@@ -124,6 +135,7 @@ export function getBlocksFromString(state) {
                     from: blockStart,
                     to: blockEnd,
                 },
+                blockId: blockId // 将 block_id 添加到块中
             };
             blocks.push(block);
             pos = blockEnd;
@@ -140,8 +152,10 @@ export function getBlocksFromString(state) {
  */
 export function getBlocks(state) {
     if (syntaxTreeAvailable(state, state.doc.length)) {
+        // console.log("getBlocksFromSyntaxTree")
         return getBlocksFromSyntaxTree(state)
     } else {
+        // console.log("getBlocksFromString")
         return getBlocksFromString(state)
     }
 }
@@ -205,11 +219,12 @@ const noteBlockWidget = () => {
             let delimiter = block.delimiter
             let deco = Decoration.replace({
                 widget: new NoteBlockStart(delimiter.from === 0 ? true : false),
+
                 inclusive: true,
                 block: true,
                 side: 0,
             });
-            //console.log("deco range:", delimiter.from === 0 ? delimiter.from : delimiter.from+1,delimiter.to-1)
+            // console.log("deco range:", delimiter.from === 0 ? delimiter.from : delimiter.from+1,delimiter.to-1)
             widgets.push(deco.range(
                 delimiter.from === 0 ? delimiter.from : delimiter.from + 1,
                 delimiter.to - 1,

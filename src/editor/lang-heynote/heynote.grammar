@@ -5,7 +5,7 @@ Note {
 }
 
 NoteDelimiter {
-    noteDelimiterEnter noteDelimiterMark NoteLanguage Auto? noteDelimiterEnter
+    noteDelimiterEnter noteDelimiterMark NoteLanguage Auto? BlockIdDelimiterMark BlockId? noteDelimiterEnter
 }
 
 
@@ -14,9 +14,11 @@ NoteDelimiter {
     NoteLanguage { "text" | "math" | "javascript" | "typescript" | "jsx" | "tsx" | "json" | "python" | "html" | "sql" | "markdown" | "java" | "php" | "css" | "xml" | "cpp" | "rust" | "csharp" | "ruby" | "shell" | "yaml" | "golang" | "clojure" | "erlang" | "lezer" | "toml" | "swift" | "kotlin" | "groovy" | "diff" | "powershell" | "vue" | "dart" }
     Auto { "-a" }
     noteDelimiterEnter { "\n" }
+    BlockIdDelimiterMark { ";;;" }
+    BlockId { @digit+ }
+
     //NoteContent { String }
     //String { (![∞])+ }
 }
 
 @external tokens noteContent from "./external-tokens.js" { NoteContent }
-
