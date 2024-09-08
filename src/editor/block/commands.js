@@ -122,7 +122,6 @@ export const addNewBlockFromClipboard = (editor) => ({ state, dispatch }) => {
 
     const result = navigator.clipboard.readText()
         .then(text => {
-            console.log(text)
             dispatch(state.update({
                 changes: {
                     from: block.content.to,

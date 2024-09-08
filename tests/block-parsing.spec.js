@@ -18,7 +18,7 @@ Text Block B
 print("Hello, World!")
 `
 contents = `
-∞∞∞html;;;1725625587741429
+∞∞∞html;;;
 <html>
     <head>
         <title>Test</title>

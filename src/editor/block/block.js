@@ -40,7 +40,7 @@ export function getBlocksFromSyntaxTree(state) {
                     const language = state.doc.sliceString(langNode.from, langNode.to)
                     const isAuto = !!type.node.getChild("Auto")
                     const blockIdNode = type.node.getChild("BlockId")
-                    const blockId = state.doc.sliceString(blockIdNode.from, blockIdNode.to)
+                    const blockId = blockIdNode ? state.doc.sliceString(blockIdNode.from, blockIdNode.to) : '';
                     const contentNode = type.node.nextSibling
                     blocks.push({
                         language: {
