@@ -51,3 +51,7 @@ ipcMain.handle('buffer-content:saveAndQuit', async (event, content) => {
 ipcMain.handle("buffer-content:selectLocation", async () => {
     return await buffer.selectLocation(); // 使用 Buffer 类中的 selectLocation 方法
 });
+
+ipcMain.handle("buffer-content:testConnection", async (event, url, username, password) => {
+    return await buffer.testConnection(url, username, password); // 使用 Buffer 类中的 testConnection 方法
+});

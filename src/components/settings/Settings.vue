@@ -60,6 +60,10 @@
                 systemFonts: [[defaultFontFamily, defaultFontFamily + " (default)"]],
                 defaultFontSize: defaultFontSize,
                 appVersion: "",
+                enableSync: this.initialSettings.enableSync,
+                remoteDbUrl: this.initialSettings.remoteDbUrl,
+                remoteDbUsername: this.initialSettings.remoteDbUsername,
+                remoteDbPassword: this.initialSettings.remoteDbPassword,
             }
         },
 
@@ -78,7 +82,14 @@
         beforeUnmount() {
             window.removeEventListener("keydown", this.onKeyDown);
         },
-
+        computed: {
+            className() {
+                return {
+                    "remote-database": true,
+                    "disabled": !this.enableSync,
+                }
+            },
+        },
         methods: {
             onKeyDown(event) {
                 if (event.key === "Escape") {
@@ -105,6 +116,10 @@
                     fontSize: this.fontSize === defaultFontSize ? undefined : this.fontSize,
                     defaultBlockLanguage: this.defaultBlockLanguage === "text" ? undefined : this.defaultBlockLanguage,
                     defaultBlockLanguageAutoDetect: this.defaultBlockLanguageAutoDetect === true ? undefined : this.defaultBlockLanguageAutoDetect,
+                    enableSync: this.enableSync,
+                    remoteDbUrl: this.remoteDbUrl,
+                    remoteDbUsername: this.remoteDbUsername,
+                    remoteDbPassword: this.remoteDbPassword,
                 })
                 if (!this.showInDock) {
                     this.showInMenu = true
@@ -123,6 +138,20 @@
                 if (!this.customBufferLocation) {
                     this.bufferPath = ""
                     this.updateSettings()
+                }
+            },
+
+            async testConnection() {
+                try {
+                    const success = await window.heynote.buffer.testConnection(this.remoteDbUrl, this.remoteDbUsername, this.remoteDbPassword)
+                    console.log(success)
+                    if (success) {
+                        alert("Connection successful!");
+                    } else {
+                        alert("Connection failed: " + response.message);
+                    }
+                } catch (error) {
+                    alert("Connection failed: " + error.message);
                 }
             },
         }
@@ -153,6 +182,12 @@
                             tab="appearance"
                             :activeTab="activeTab" 
                             @click="activeTab = 'appearance'"
+                        />
+                        <TabListItem 
+                            name="Database" 
+                            tab="database" 
+                            :activeTab="activeTab" 
+                            @click="activeTab = 'database'"
                         />
                         <TabListItem 
                             :name="isWebApp ? 'Version' : 'Updates'" 
@@ -235,7 +270,7 @@
                                 </label>
                             </div>
                         </div>
-                        <div class="row" v-if="!isWebApp">
+                        <!-- <div class="row" v-if="!isWebApp">
                             <div class="entry buffer-location">
                                 <h2>Buffer File Path</h2>
                                 <label class="keyboard-shortcut-label">
@@ -254,7 +289,7 @@
                                     <span class="path" v-show="customBufferLocation && bufferPath">{{ bufferPath }}</span>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
                     </TabContent>
 
                     <TabContent tab="editing" :activeTab="activeTab">
@@ -339,6 +374,63 @@
                         </div>
                     </TabContent>
                     
+
+                    <TabContent tab="database" :activeTab="activeTab">
+                        <div class="row">
+                            <div class="entry">
+                                <label>
+                                    <input 
+                                        type="checkbox" 
+                                        v-model="enableSync" 
+                                        @change="updateSettings"
+                                    />
+                                    Enable remote database sync
+                                </label>
+                            </div>
+                        </div>
+                        <div :class="className">
+                            <div class="row">
+                                <div class="entry" style="width: 100%;">
+                                    <h2>Remote Database</h2>
+                                    <input 
+                                        v-model="remoteDbUrl" 
+                                        @change="updateSettings" 
+                                        style="width: 100%; box-sizing: border-box;" 
+                                        :disabled="!enableSync" 
+                                        placeholder="Database URL, e.g. http://couch.example.com:5984/heynote"
+                                    />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="entry">
+                                    <input 
+                                        v-model="remoteDbUsername" 
+                                        @change="updateSettings" 
+                                        :disabled="!enableSync" 
+                                        placeholder="Username"
+                                    />
+                                </div>
+                                <div class="entry">
+                                    <input 
+                                        type="password" 
+                                        v-model="remoteDbPassword" 
+                                        @change="updateSettings" 
+                                        :disabled="!enableSync" 
+                                        placeholder="Password"
+                                    />
+                                </div>
+                                <div class="entry">
+                                    <button 
+                                        @click="testConnection" 
+                                        :disabled="!enableSync"
+                                    >
+                                        Test
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </TabContent>
+
                     <TabContent tab="updates" :activeTab="activeTab">
                         <div class="row">
                             <div class="entry">
@@ -505,6 +597,19 @@
                                     +dark-mode
                                         background: #222
                                         color: #aaa
+                        .remote-database
+                            padding: 7px
+                            border-radius: 3px
+                            border: 1px solid #c4c4c4
+                            background: #eee
+                            +dark-mode
+                                border: 1px solid #666
+                                background: #555
+
+                            &.disabled
+                                opacity: 0.3
+            select
+                margin-right: 5px
             .bottom-bar
                 border-radius: 0 0 5px 5px
                 background: #eee

@@ -22,6 +22,7 @@ export class Buffer {
         this._lastSavedContent = null;
         
         this.currentNoteIndex = CONFIG.get("noteIndex");
+        this.enableSync = CONFIG.get("enableSync"); // 获取同步功能设置
         console.log("current note index:" + this.currentNoteIndex);
         
         this.delim = '\n∞∞∞';
@@ -145,9 +146,60 @@ this is a new note, No.${this.currentNoteIndex}
         return result.docs.length > 0; // 返回存在`与否
     }
 
+    async sync() {
+        if (!this.enableSync) {
+            console.log("Sync is disabled.");
+            return; // 如果未启用同步，则返回
+        }
+
+        // 同步本地数据库与远程数据库
+        const remoteDbUrl = CONFIG.get("remoteDbUrl");
+        const remoteDbUsername = CONFIG.get("remoteDbUsername");
+        const remoteDbPassword = CONFIG.get("remoteDbPassword");
+        const remoteDb = new PouchDB(remoteDbUrl, {
+            ajax: {
+                auth: `${remoteDbUsername}:${remoteDbPassword}`
+            }
+        });
+
+        const syncHandler = db.sync(remoteDb, {
+            live: true,
+            retry: true
+        }).on('change', (info) => {
+            console.log("Sync change:", info);
+        }).on('paused', (info) => {
+            console.log("Sync paused:", info);
+        }).on('active', (info) => {
+            console.log("Sync resumed:", info);
+        }).on('error', (err) => {
+            console.error("Sync error:", err);
+        });
+        
+        return syncHandler; // 返回同步处理程序
+    }
+
+    async testConnection(url, username, password) {
+        try {
+            const remoteDb = new PouchDB(url, {
+                auth: {
+                    username: username,
+                    password: password
+                }
+            });
+            let info = await remoteDb.info();
+            // let index = await remoteDb.getIndexes()
+            console.log(info)
+            return true; // 连接成功，返回 true
+        } catch (error) {
+            console.error("连接失败:", error);
+            return false; // 连接失败，返回 false
+        }
+    }
+    
     close() {
         // PouchDB 不需要关闭
     }
+
 }
 
 function generateUniqueId() {

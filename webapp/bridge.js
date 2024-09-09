@@ -96,6 +96,8 @@ const Heynote = {
         onChangeCallback(callback) {
             
         },
+        async testConnection(url, username, password) {
+        }
     },
 
     onWindowClose(callback) {

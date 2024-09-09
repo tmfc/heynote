@@ -78,6 +78,10 @@ contextBridge.exposeInMainWorld("heynote", {
 
         async selectLocation() {
             return await ipcRenderer.invoke("buffer-content:selectLocation")
+        },
+        
+        async testConnection(url, username, password) {
+            return await ipcRenderer.invoke("buffer-content:testConnection", url, username, password)
         }
     },
 
