@@ -82,7 +82,7 @@ const Heynote = {
     buffer: {
         async load() {
             const content = localStorage.getItem("buffer")
-            return content === null ? "\n∞∞∞text-a\n" : content
+            return content === null ? "\n∞∞∞text-a;;;\n" : content
         },
 
         async save(content) {

@@ -143,14 +143,14 @@ export const addNewBlockFromClipboard = (editor) => ({ state, dispatch }) => {
 export function changeLanguageTo(state, dispatch, block, language, auto) {
     if (state.readOnly)
         return false
-    const delimRegex = /^\n∞∞∞[a-z]+?(-a)?\n/g
+    const delimRegex = /^\n∞∞∞[a-z]+?(-a)?;;;(\d+)?\n/g
     if (state.doc.sliceString(block.delimiter.from, block.delimiter.to).match(delimRegex)) {
         //console.log("changing language to", language)
         dispatch(state.update({
             changes: {
                 from: block.delimiter.from,
                 to: block.delimiter.to,
-                insert: `\n∞∞∞${language}${auto ? '-a' : ''}\n`,
+                insert: `\n∞∞∞${language}${auto ? '-a' : ''};;;${block.id || ''}\n`,
             },
             annotations: [heynoteEvent.of(LANGUAGE_CHANGE)],
         }))

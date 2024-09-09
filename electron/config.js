@@ -43,11 +43,10 @@ const schema = {
             // future and have it apply to existing users
             "fontFamily": {type: "string"}, 
             "fontSize": {type: "integer"},  
-            
+            "enableSync": {type: "boolean", default: false}, // 启用同步功能
             "remoteDbUrl": {type: "string", default: ""}, // 远程数据库地址
             "remoteDbUsername": {type: "string", default: ""}, // 远程数据库用户名
             "remoteDbPassword": {type: "string", default: ""}, // 远程数据库密码
-            "enableSync": {type: "boolean", default: false}, // 启用同步功能
         },
     },
 

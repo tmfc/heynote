@@ -22,8 +22,9 @@ export class Buffer {
         this._lastSavedContent = null;
         
         this.currentNoteIndex = CONFIG.get("noteIndex");
-        this.enableSync = CONFIG.get("enableSync"); // 获取同步功能设置
+        this.enableSync = CONFIG.get("settings.enableSync"); // 获取同步功能设置
         console.log("current note index:" + this.currentNoteIndex);
+        this.sync().then(handler => {console.log("sync handler:" + handler); this.syncHandler = handler;});
         
         this.delim = '\n∞∞∞';
     }
@@ -153,12 +154,13 @@ this is a new note, No.${this.currentNoteIndex}
         }
 
         // 同步本地数据库与远程数据库
-        const remoteDbUrl = CONFIG.get("remoteDbUrl");
-        const remoteDbUsername = CONFIG.get("remoteDbUsername");
-        const remoteDbPassword = CONFIG.get("remoteDbPassword");
+        const remoteDbUrl = CONFIG.get("settings.remoteDbUrl");
+        const remoteDbUsername = CONFIG.get("settings.remoteDbUsername");
+        const remoteDbPassword = CONFIG.get("settings.remoteDbPassword");
         const remoteDb = new PouchDB(remoteDbUrl, {
-            ajax: {
-                auth: `${remoteDbUsername}:${remoteDbPassword}`
+            auth: {
+                username: remoteDbUsername,
+                password: remoteDbPassword
             }
         });
 
