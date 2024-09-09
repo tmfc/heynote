@@ -14,7 +14,7 @@
 
         data() {
             return {
-                fileIndex: 1,
+                noteIndex: 1,
                 line: 1,
                 column: 1,
                 selectionSize: 0,
@@ -31,8 +31,8 @@
         },
 
         mounted() {           
-            this.fileIndex = window.heynote.getFileIndex().then((fileIndex) => {
-                this.fileIndex = fileIndex;
+            this.noteIndex = window.heynote.getNoteIndex().then((noteIndex) => {
+                this.noteIndex = noteIndex;
             })
 
             window.heynote.themeMode.get().then((mode) => {
@@ -48,9 +48,9 @@
                 }
             }
             onThemeChange(window.heynote.themeMode.initial)
-            window.heynote.onToggleFile((newFileIndex) => {
-                console.log("app on toggle file callback:", newFileIndex)
-                this.fileIndex = newFileIndex
+            window.heynote.onToggleNote((newNoteIndex) => {
+                console.log("app on toggle note callback:", newNoteIndex)
+                this.noteIndex = newNoteIndex
             })
             window.heynote.themeMode.onChange(onThemeChange)
             window.heynote.onSettingsChange((settings) => {
@@ -74,23 +74,15 @@
                 this.$refs.editor.focus()
             },
 
-            // toggleFile() {
-            //     this.$refs.editor.save()
-
-            //     let newFileIndex = (this.fileIndex % 3) + 1;
-            //     window.heynote.toggleFile(newFileIndex)
-            //     // this.fileIndex = newFileIndex
-            //     this.$refs.editor.focus()
-            // },
-            toggleFile(newFileIndex) {
-                if (newFileIndex === this.fileIndex) {
+            toggleNote(newNoteIndex) {
+                if (newNoteIndex === this.noteIndex) {
                     return
                 }
-                if (newFileIndex == null) {
-                    newFileIndex = (this.fileIndex % 3) + 1;
+                if (newNoteIndex == null) {
+                    newNoteIndex = (this.noteIndex % 3) + 1;
                 }
                 this.$refs.editor.save()
-                window.heynote.toggleFile(newFileIndex)
+                window.heynote.toggleNote(newNoteIndex)
                 this.$refs.editor.focus()
             },
 
@@ -173,10 +165,10 @@
             class="editor"
             ref="editor"
             @openLanguageSelector="openLanguageSelector"
-            @toggleFile="toggleFile"
+            @toggleNote="toggleNote"
         />
         <StatusBar 
-            :fileIndex="fileIndex"
+            :noteIndex="noteIndex"
             :line="line" 
             :column="column" 
             :selectionSize="selectionSize"
@@ -186,7 +178,7 @@
             :themeSetting="themeSetting"
             :autoUpdate="settings.autoUpdate"
             :allowBetaVersions="settings.allowBetaVersions"
-            @toggleFile="toggleFile"
+            @toggleNote="toggleNote"
             @toggleTheme="toggleTheme"
             @openLanguageSelector="openLanguageSelector"
             @formatCurrentBlock="formatCurrentBlock"

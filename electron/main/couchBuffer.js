@@ -21,7 +21,7 @@ export class Buffer {
         this.onChange = onChange;
         this._lastSavedContent = null;
         
-        this.currentNoteIndex = CONFIG.get("fileIndex");
+        this.currentNoteIndex = CONFIG.get("noteIndex");
         console.log("current note index:" + this.currentNoteIndex);
         
         this.delim = '\n∞∞∞';

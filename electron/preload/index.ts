@@ -6,7 +6,7 @@ import {
     WINDOW_CLOSE_EVENT, 
     OPEN_SETTINGS_EVENT, 
     SETTINGS_CHANGE_EVENT, 
-    FILE_TOGGLE_EVENT,
+    NOTE_TOGGLE_EVENT,
     UPDATE_AVAILABLE_EVENT, 
     UPDATE_ERROR, 
     UPDATE_DOWNLOAD_PROGRESS, 
@@ -42,17 +42,17 @@ contextBridge.exposeInMainWorld("heynote", {
         ipcRenderer.on(WINDOW_CLOSE_EVENT, callback)
     },
 
-    toggleFile(newFileIndex) {
-        ipcRenderer.invoke("file:toggle", newFileIndex)
+    toggleNote(newNoteIndex) {
+        ipcRenderer.invoke("note:toggle", newNoteIndex)
     },
 
-    onToggleFile(callback) {
-        ipcRenderer.on(FILE_TOGGLE_EVENT, (event, newFileIndex) => callback(newFileIndex))
+    onToggleNote(callback) {
+        ipcRenderer.on(NOTE_TOGGLE_EVENT, (event, newNoteIndex) => callback(newNoteIndex))
     },
 
-    async getFileIndex() {
-        const fileIndex = await ipcRenderer.invoke('file:get-index')
-        return fileIndex;
+    async getNoteIndex() {
+        const noteIndex = await ipcRenderer.invoke('note:get-index')
+        return noteIndex;
     },
 
     onOpenSettings(callback) {

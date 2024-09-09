@@ -23,7 +23,7 @@ import { todoCheckboxPlugin} from "./todo-checkbox.ts"
 import { links } from "./links.js"
 
 export const LANGUAGE_SELECTOR_EVENT = "openLanguageSelector"
-export const TOGGLE_FILE_EVENT = "toggleFile"
+export const TOGGLE_NOTE_EVENT = "toggleNote"
 
 function getKeymapExtensions(editor, keymap) {
     if (keymap === "emacs") {
@@ -190,8 +190,8 @@ export class HeynoteEditor {
     openLanguageSelector() {
         this.element.dispatchEvent(new Event(LANGUAGE_SELECTOR_EVENT))
     }
-    toggleFile(newFileIndex) {
-        this.element.dispatchEvent(new CustomEvent(TOGGLE_FILE_EVENT, {detail:{newFileIndex: newFileIndex}}))
+    toggleNote(newNoteIndex) {
+        this.element.dispatchEvent(new CustomEvent(TOGGLE_NOTE_EVENT, {detail:{newNoteIndex: newNoteIndex}}))
     }
 
     setCurrentLanguage(lang, auto=false) {

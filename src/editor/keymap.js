@@ -67,8 +67,8 @@ export function heynoteKeymap(editor) {
         {key:"Mod-ArrowDown", run:gotoNextBlock, shift:selectNextBlock},
         {key:"Ctrl-ArrowUp", run:gotoPreviousParagraph, shift:selectPreviousParagraph},
         {key:"Ctrl-ArrowDown", run:gotoNextParagraph, shift:selectNextParagraph},
-        ["Mod-1", () => editor.toggleFile(1)],
-        ["Mod-2", () => editor.toggleFile(2)],
-        ["Mod-3", () => editor.toggleFile(3)],
+        ["Mod-1", () => editor.toggleNote(1)],
+        ["Mod-2", () => editor.toggleNote(2)],
+        ["Mod-3", () => editor.toggleNote(3)],
     ])
 }

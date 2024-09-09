@@ -7,7 +7,7 @@
 
     export default {
         props: [
-            "fileIndex",
+            "noteIndex",
             "line", 
             "column", 
             "selectionSize",
@@ -68,8 +68,8 @@
 
 <template>
     <div :class="className">
-        <div class="status-block line-number clickable" @click="$emit('toggleFile')" title="Toggle File 1/2/3">
-            File <span class="num file-index">{{ fileIndex }}</span> <!-- 添加了 file-index 类 -->
+        <div class="status-block line-number clickable" @click="$emit('toggleNote')" title="Toggle Note 1/2/3">
+            Note <span class="num">{{ noteIndex }}</span>
         </div>
         <div class="status-block line-number">
             Ln <span class="num">{{ line }}</span>

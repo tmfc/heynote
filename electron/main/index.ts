@@ -4,7 +4,7 @@ import { join } from 'node:path'
 import fs from "fs"
 
 import { menu, getTrayMenu } from './menu'
-import { WINDOW_CLOSE_EVENT, SETTINGS_CHANGE_EVENT, FILE_TOGGLE_EVENT } from '../constants';
+import { WINDOW_CLOSE_EVENT, SETTINGS_CHANGE_EVENT, NOTE_TOGGLE_EVENT } from '../constants';
 import CONFIG from "../config"
 import { isDev, isLinux, isMac, isWindows } from '../detect-platform';
 import { initializeAutoUpdate, checkForUpdates } from './auto-update';
@@ -351,15 +351,15 @@ ipcMain.handle('dark-mode:get', () => nativeTheme.themeSource)
 // load buffer on app start
 loadBuffer()
 
-ipcMain.handle('file:get-index', () => {
-    return CONFIG.get("fileIndex");
+ipcMain.handle('note:get-index', () => {
+    return CONFIG.get("noteIndex");
 })
 
-ipcMain.handle('file:toggle', async (event, newFileIndex) => {
-    let oldFileIndex = CONFIG.get("fileIndex") || 1;
-    await toggleBuffer(oldFileIndex, newFileIndex);
-    CONFIG.set('fileIndex', newFileIndex);
-    win?.webContents.send(FILE_TOGGLE_EVENT, newFileIndex)
+ipcMain.handle('note:toggle', async (event, newNoteIndex) => {
+    let oldNoteIndex = CONFIG.get("noteIndex") || 1;
+    await toggleBuffer(oldNoteIndex, newNoteIndex);
+    CONFIG.set('noteIndex', newNoteIndex);
+    win?.webContents.send(NOTE_TOGGLE_EVENT, newNoteIndex)
 })
 
 ipcMain.handle('settings:set', async (event, settings) => {

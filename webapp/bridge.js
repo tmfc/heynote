@@ -1,4 +1,4 @@
-import { FILE_TOGGLE_EVENT, SETTINGS_CHANGE_EVENT, OPEN_SETTINGS_EVENT } from "../electron/constants";
+import { NOTE_TOGGLE_EVENT, SETTINGS_CHANGE_EVENT, OPEN_SETTINGS_EVENT } from "../electron/constants";
 
 const mediaMatch = window.matchMedia('(prefers-color-scheme: dark)')
 let themeCallback = null
@@ -102,16 +102,16 @@ const Heynote = {
         //ipcRenderer.on(WINDOW_CLOSE_EVENT, callback)
     },
 
-    toggleFile(newFileIndex) {
-        localStorage.setItem("fileIndex", newFileIndex)
-        ipcRenderer.send(FILE_TOGGLE_EVENT, newFileIndex)
+    toggleNote(newNoteIndex) {
+        localStorage.setItem("noteIndex", newNoteIndex)
+        ipcRenderer.send(NOTE_TOGGLE_EVENT, newNoteIndex)
     },
 
-    onToggleFile(callback) {
-        ipcRenderer.on(FILE_TOGGLE_EVENT, (event, newFileIndex) => callback(newFileIndex))
+    onToggleNote(callback) {
+        ipcRenderer.on(NOTE_TOGGLE_EVENT, (event, newNoteIndex) => callback(newNoteIndex))
     },
-    getFileIndex() {
-        ipcRenderer.on(FILE_GET_INDEX_EVENT, parseInt(localStorage.getItem("fileIndex") || "1"))
+    getNoteIndex() {
+        ipcRenderer.on(NOTE_GET_INDEX_EVENT, parseInt(localStorage.getItem("noteIndex") || "1"))
     },
 
     settings: initialSettings,

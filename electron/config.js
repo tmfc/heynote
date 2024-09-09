@@ -55,7 +55,7 @@ const schema = {
             timeFetched: {type: "number"},
         },
     },
-    fileIndex: {type: "integer", default:1 },
+    noteIndex: {type: "integer", default:1 },
 }
 
 const defaults = {
