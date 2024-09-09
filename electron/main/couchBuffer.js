@@ -28,7 +28,7 @@ export class Buffer {
     }
 
     async load() {
-        const notes = await this.getNotes();
+        const notes = await this.getBlocks();
         // 组合返回内容，格式为 this.delim + note.type + "||" + note._id + note.content
         let result = notes.map(note => {
             const type = note.type || 'text-a';
@@ -41,7 +41,7 @@ export class Buffer {
     }
 
     async save(content) {
-        const note_id = this.currentNoteIndex;
+        const noteId = this.currentNoteIndex;
         // console.log("couchBuffer save:" + content);
         const notes = content.split(this.delim); // 按分隔符切分内容
         // console.log("note count:" + notes.length);
@@ -71,29 +71,38 @@ export class Buffer {
             } else {
                 // 新建文档
                 const newBlockId = generateUniqueId(); // 生成 _id
-                const newBlock = { _id: newBlockId, content: blockData, note_id: note_id, type: blockType }; // 增加 node_id 和 type 字段
+                docIdsInContent.add(newBlockId);
+                const newBlock = { _id: newBlockId, content: blockData, note_id: noteId, type: blockType }; // 增加 node_id 和 type 字段
                 console.log("newBlock _id: " + newBlock._id + ", note_id: " + newBlock.note_id + ", type: " + newBlock.type);
                 const response = await db.put(newBlock);
                 responses.push(response);
             }
         }
 
-        // // 处理删除操作
-        // const existingNotes = await this.getNotes(); // 获取当前所有文档
-        // for (const existingNote of existingNotes) {
-        //     if (!docIdsInContent.has(existingNote._id)) {
-        //         await db.remove(existingNote); // 删除不存在于 notes 中的文档
-        //     }
-        // }
+
+        // 处理删除操作
+        const existingBlocks = await this.getBlocks(noteId); // 获取当前所有文档
+        console.log("blocks count in db:" + existingBlocks.length);
+        console.log("blocks count in content:" + docIdsInContent.size);
+        //打印docIdsInContent set中的元素
+        for (const id of docIdsInContent) {
+            console.log("block id in content:" + id);
+        }
+        for (const existingNote of existingBlocks) {
+            if (!docIdsInContent.has(existingNote._id)) {
+                console.log("delete block:" + existingNote._id);
+                await db.remove(existingNote); // 删除不存在于 notes 中的文档
+            }
+        }
 
         this._lastSavedContent = content;
         return responses; // 返回所有保存的响应
     }
 
-    async getNotes() {
-        console.log("getNotes:" + this.currentNoteIndex);
+    async getBlocks(noteId = this.currentNoteIndex) {
+        console.log("get blocks for note:" + noteId);
         const result = await db.find({
-            selector: { note_id: this.currentNoteIndex }, // 根据 note_id 查询文档
+            selector: { note_id: noteId }, // 根据 note_id 查询文档
             include_docs: true // 包含文档内容
         });
         console.log("文档数量: " + result.docs.length);
@@ -105,7 +114,7 @@ export class Buffer {
         const noteExists = await this.exists();
         if(noteExists)
         {
-            const notes = await this.getNotes();
+            const notes = await this.getBlocks();
             let result = notes.map(note => {
                 const type = note.type || 'text';
 
