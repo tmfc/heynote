@@ -144,7 +144,6 @@
             async testConnection() {
                 try {
                     const success = await window.heynote.buffer.testConnection(this.remoteDbUrl, this.remoteDbUsername, this.remoteDbPassword)
-                    console.log(success)
                     if (success) {
                         alert("Connection successful!");
                     } else {

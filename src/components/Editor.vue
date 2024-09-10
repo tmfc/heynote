@@ -87,6 +87,7 @@
 
                 // set up buffer change listener
                 window.heynote.buffer.onChangeCallback((event, content) => {
+                    console.log("Editor:buffer onChangeCallback called:", content)
                     diskContent = content
                     this.editor.setContent(content)
                 })

@@ -47,9 +47,9 @@ Shopping list:
     const treeBlocks = getBlocksFromSyntaxTree(state)
     const stringBlocks = getBlocksFromString(state)
 
-    console.log("treeBlock:" + treeBlocks.length);
-    console.log("stringBlock:" + stringBlocks.length);
-    console.log(stringBlocks[0]);
-    console.log(treeBlocks[0]);
+    // console.log("treeBlock:" + treeBlocks.length);
+    // console.log("stringBlock:" + stringBlocks.length);
+    // console.log(stringBlocks[0]);
+    // console.log(treeBlocks[0]);
     expect(treeBlocks).toEqual(stringBlocks)
 })

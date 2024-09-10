@@ -49,7 +49,6 @@
             }
             onThemeChange(window.heynote.themeMode.initial)
             window.heynote.onToggleNote((newNoteIndex) => {
-                console.log("app on toggle note callback:", newNoteIndex)
                 this.noteIndex = newNoteIndex
             })
             window.heynote.themeMode.onChange(onThemeChange)

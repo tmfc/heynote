@@ -1,4 +1,5 @@
 import CONFIG from "../config"
+import { Notification } from 'electron';
 
 var PouchDB = require('pouchdb');
 PouchDB.plugin(require('pouchdb-find')); // 引入 find 插件
@@ -6,7 +7,6 @@ const db = new PouchDB('notes');
 // check note_id index, if not exist, create index
 db.getIndexes().then(result => {
     const indexExists = result.indexes && result.indexes.some(index => index.def.fields.some(field => Object.keys(field)[0] === 'note_id'));
-    console.log("indexExists:" + indexExists);
     if (!indexExists) {
         return db.createIndex({
             index: {
@@ -24,8 +24,7 @@ export class Buffer {
         
         this.currentNoteIndex = CONFIG.get("noteIndex");
         this.enableSync = CONFIG.get("settings.enableSync"); // 获取同步功能设置
-        console.log("current note index:" + this.currentNoteIndex);
-        this.sync().then(handler => {console.log("sync handler:" + handler); this.syncHandler = handler;});
+        this.sync().then(handler => {this.syncHandler = handler;});
         
         this.delim = '\n∞∞∞';
     }
@@ -37,8 +36,6 @@ export class Buffer {
             const type = note.type || 'text-a';
             return this.delim + type + ";;;" + note._id + '\n' + note.content;
         }).join('');
-        // 打印 notes数量
-        // console.log("couchBuffer loads:" + result);
 
         return result;
     }
@@ -83,7 +80,6 @@ export class Buffer {
                 const newBlockId = generateUniqueId(); // 生成 _id
                 docIdsInContent.add(newBlockId);
                 const newBlock = { _id: newBlockId, content: blockData, note_id: noteId, type: blockType }; // 增加 node_id 和 type 字段
-                console.log("newBlock _id: " + newBlock._id + ", note_id: " + newBlock.note_id + ", type: " + newBlock.type);
                 const response = await db.put(newBlock);
                 responses.push(response);
             }
@@ -92,7 +88,6 @@ export class Buffer {
         // 处理删除操作
         for (const existingNote of existingBlocks) {
             if (!docIdsInContent.has(existingNote._id)) {
-                console.log("delete block:" + existingNote._id);
                 await db.remove(existingNote); // 删除不存在于 notes 中的文档
             }
         }
@@ -103,14 +98,9 @@ export class Buffer {
     }
 
     async getBlocks(noteId = this.currentNoteIndex) {
-        console.log("get blocks for note:" + noteId);
         const result = await db.find({
             selector: { note_id: noteId }, // 根据 note_id 查询文档
             include_docs: true // 包含文档内容
-        });
-        // 输出获取到的 block 的 note_id 和 content
-        result.docs.forEach(block => {
-            console.log("block _id:", block._id);
         });
         return result.docs; // 返回符合条件的文档
     }
@@ -137,7 +127,6 @@ Welcome to Heynote! 👋
 this is a new note, No.${this.currentNoteIndex}
 ∞∞∞text-a;;;
 `
-            console.log("show default note:" + this.currentNoteIndex);
             this.onChange(defaultNote);
         }
     }
@@ -147,7 +136,6 @@ this is a new note, No.${this.currentNoteIndex}
             selector: { note_id: this.currentNoteIndex },
             limit: 1 // 只需要检查是否存在，限制返回结果为1
         });
-        console.log("couchBuffer exists:" + result.docs.length > 0);
         return result.docs.length > 0; // 返回存在`与否
     }
 
@@ -172,37 +160,52 @@ this is a new note, No.${this.currentNoteIndex}
             live: true,
             retry: true
         }).on('change', async (info) => {
-            console.log("Sync change:", info);
             if(info.direction == 'pull')
             {
                 // 检查从远程服务器获取到的新 block 中有没有 note_id 是当前文档的
                 const newBlocks = info.change.docs;
                 const currentNoteId = this.currentNoteIndex;
-                const hasCurrentNoteId = newBlocks.some(block => block.note_id === currentNoteId);
-                if (hasCurrentNoteId) {
-                    console.log("当前文档的 note_id 存在于新获取的 block 中");
+                const currentNoteUpdated = newBlocks.some(block => block.note_id === currentNoteId);
+                if (currentNoteUpdated) {
+                    console.log("当前文档被更像了");
+                    // 在界面上弹出一个提示，提示用户有新的内容
+                    const notification = new Notification({
+                        title: '从远程服务器获取到新内容',
+                        body: '点击刷新笔记',
+                        icon: 'path/to/icon.png', // 可选
+                    });
+                
+                    notification.on('click', () => {
+                        // 刷新笔记
+                        this.load().then(result => {
+                            this.onChange(result);
+                            notification.close();
+                        });
+                    });
+                
+                    notification.on('close', () => {
+                        console.log('通知被关闭！');
+                    });
+                
+                    notification.show();
                 }
-                // 输出获取到的 block 的 note_id 和 content
-                newBlocks.forEach(block => {
-                    console.log("block _id:", block._id, "block note_id:", block.note_id, "content:", block.content, "type:", block.type);
-                });
+
                 // 获取到所有block 的 _id，保存到 this.newBlocksFromRemote
                 this.newBlocksFromRemote = newBlocks.map(block => block._id);
             }
             
         }).on('paused', (info) => {
-            console.log("Sync paused:", info);
+            // console.log("Sync paused:", info);
         }).on('active', (info) => {
-            console.log("Sync resumed:", info);
+            // console.log("Sync resumed:", info);
         }).on('error', (err) => {
-            console.error("Sync error:", err);
+            // console.error("Sync error:", err);
         });
         
         return syncHandler; // 返回同步处理程序
     }
 
     async testConnection(url, username, password) {
-        console.log(password)
         try {
             const remoteDb = new PouchDB(url, {
                 auth: {
@@ -212,7 +215,6 @@ this is a new note, No.${this.currentNoteIndex}
             });
             let info = await remoteDb.info();
             // let index = await remoteDb.getIndexes()
-            console.log(info)
             return true; // 连接成功，返回 true
         } catch (error) {
             console.error("连接失败:", error);
