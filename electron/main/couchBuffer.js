@@ -20,6 +20,7 @@ export class Buffer {
     constructor({ onChange }) {
         this.onChange = onChange;
         this._lastSavedContent = null;
+        this.newBlocksFromRemote = [];
         
         this.currentNoteIndex = CONFIG.get("noteIndex");
         this.enableSync = CONFIG.get("settings.enableSync"); // 获取同步功能设置
@@ -44,15 +45,19 @@ export class Buffer {
 
     async save(content) {
         const noteId = this.currentNoteIndex;
-        // console.log("couchBuffer save:" + content);
+
+        const existingBlocks = await this.getBlocks(noteId); // 获取当前所有block
         const notes = content.split(this.delim); // 按分隔符切分内容
-        // console.log("note count:" + notes.length);
-        // console.log("currentNoteIndex:" + this.currentNoteIndex);
+
         const responses = [];
         const docIdsInContent = new Set(); // 用于存储当前内容中的 block._id
+        // 将 this.newBlocksFromRemote 中的 _id 添加到 docIdsInContent，防止从服务器pull下来的block被删除
+        this.newBlocksFromRemote.forEach(blockId => {
+            docIdsInContent.add(blockId);
+        });
 
         for (const noteContent of notes) {
-            if(noteContent == "")
+            if (noteContent == "")
                 continue;
             const [typeWithId, ...rest] = noteContent.trim().split('\n');
             const blockId = typeWithId.split(';;;')[1]; // 假设 note_id 在 typeWithId 中
@@ -63,12 +68,15 @@ export class Buffer {
 
             if (blockId) {
                 // 更新现有文档
-                const existingBlock = await db.get(blockId).catch(() => null);
+                const existingBlock = existingBlocks.find(block => block._id === blockId); // 从 existingBlocks 获取
                 if (existingBlock) {
-                    existingBlock.content = blockData; // 更新内容
-                    existingBlock.type = blockType; // 更新类型
-                    const response = await db.put(existingBlock);
-                    responses.push(response);
+                    // 检查内容是否有改变
+                    if (existingBlock.content !== blockData || existingBlock.type !== blockType) {
+                        existingBlock.content = blockData; // 更新内容
+                        existingBlock.type = blockType; // 更新类型
+                        const response = await db.put(existingBlock);
+                        responses.push(response);
+                    }
                 }
             } else {
                 // 新建文档
@@ -81,15 +89,7 @@ export class Buffer {
             }
         }
 
-
         // 处理删除操作
-        const existingBlocks = await this.getBlocks(noteId); // 获取当前所有文档
-        console.log("blocks count in db:" + existingBlocks.length);
-        console.log("blocks count in content:" + docIdsInContent.size);
-        //打印docIdsInContent set中的元素
-        for (const id of docIdsInContent) {
-            console.log("block id in content:" + id);
-        }
         for (const existingNote of existingBlocks) {
             if (!docIdsInContent.has(existingNote._id)) {
                 console.log("delete block:" + existingNote._id);
@@ -98,6 +98,7 @@ export class Buffer {
         }
 
         this._lastSavedContent = content;
+        this.newBlocksFromRemote = []; // 清空 this.newBlocksFromRemote
         return responses; // 返回所有保存的响应
     }
 
@@ -107,7 +108,10 @@ export class Buffer {
             selector: { note_id: noteId }, // 根据 note_id 查询文档
             include_docs: true // 包含文档内容
         });
-        console.log("文档数量: " + result.docs.length);
+        // 输出获取到的 block 的 note_id 和 content
+        result.docs.forEach(block => {
+            console.log("block _id:", block._id);
+        });
         return result.docs; // 返回符合条件的文档
     }
 
@@ -167,8 +171,25 @@ this is a new note, No.${this.currentNoteIndex}
         const syncHandler = db.sync(remoteDb, {
             live: true,
             retry: true
-        }).on('change', (info) => {
+        }).on('change', async (info) => {
             console.log("Sync change:", info);
+            if(info.direction == 'pull')
+            {
+                // 检查从远程服务器获取到的新 block 中有没有 note_id 是当前文档的
+                const newBlocks = info.change.docs;
+                const currentNoteId = this.currentNoteIndex;
+                const hasCurrentNoteId = newBlocks.some(block => block.note_id === currentNoteId);
+                if (hasCurrentNoteId) {
+                    console.log("当前文档的 note_id 存在于新获取的 block 中");
+                }
+                // 输出获取到的 block 的 note_id 和 content
+                newBlocks.forEach(block => {
+                    console.log("block _id:", block._id, "block note_id:", block.note_id, "content:", block.content, "type:", block.type);
+                });
+                // 获取到所有block 的 _id，保存到 this.newBlocksFromRemote
+                this.newBlocksFromRemote = newBlocks.map(block => block._id);
+            }
+            
         }).on('paused', (info) => {
             console.log("Sync paused:", info);
         }).on('active', (info) => {
@@ -181,6 +202,7 @@ this is a new note, No.${this.currentNoteIndex}
     }
 
     async testConnection(url, username, password) {
+        console.log(password)
         try {
             const remoteDb = new PouchDB(url, {
                 auth: {
