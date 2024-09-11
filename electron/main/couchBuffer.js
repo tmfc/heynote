@@ -35,22 +35,20 @@ export class Buffer {
     async startSync() {
         
         this.enableSync = true;
-        console.log("startSync", syncHandler);
+        console.log("startSync");
         if (syncHandler) {
             syncHandler.cancel();
         }
         await this.sync();
-        console.log("startSync end", syncHandler);
     }
 
     stopSync() {
         this.enableSync = false;
-        console.log("stopSync", syncHandler);
+        console.log("stopSync");
         if (syncHandler) {
             syncHandler.cancel();
             syncHandler = null;
         }
-        console.log("stopSync end", syncHandler);
     }
 
     async sync() {
@@ -81,7 +79,7 @@ export class Buffer {
                 const currentNoteId = this.currentNoteIndex;
                 const currentNoteUpdated = newBlocks.some(block => block.note_id === currentNoteId);
                 if (currentNoteUpdated) {
-                    console.log("当前文档被更像了");
+                    console.log("current note updated");
                     // 在界面上弹出一个提示，提示用户有新的内容
                     const notification = new Notification({
                         title: '从远程服务器获取到新内容',
@@ -98,7 +96,7 @@ export class Buffer {
                     });
                 
                     notification.on('close', () => {
-                        console.log('通知被关闭！');
+                        console.log('notification closed');
                     });
                 
                     notification.show();
@@ -109,14 +107,13 @@ export class Buffer {
             }
             
         }).on('paused', (info) => {
-            console.log("Sync paused:", info);
+            console.log("Sync paused:");
         }).on('active', (info) => {
-            console.log("Sync resumed:", info);
+            console.log("Sync resumed:");
         }).on('error', (err) => {
             console.error("Sync error:", err);
         });
         
-        console.log("sync end", syncHandler);
         return syncHandler; // 返回同步处理程序
     }
 
