@@ -55,3 +55,12 @@ ipcMain.handle("buffer-content:selectLocation", async () => {
 ipcMain.handle("buffer-content:testConnection", async (event, url, username, password) => {
     return await buffer.testConnection(url, username, password); // 使用 Buffer 类中的 testConnection 方法
 });
+
+ipcMain.handle("toggle-sync", (event, enable) => {
+    console.log("ipc Main toggle-sync", enable);
+    if (enable) {
+        buffer.startSync();
+    } else {
+        buffer.stopSync();
+    }
+});

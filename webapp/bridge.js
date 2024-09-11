@@ -154,6 +154,11 @@ const Heynote = {
         initial: localStorage.getItem("theme") || "system",
     },
 
+    toggleSync(enable) {
+        console.log("brideg toggleSync", enable);
+        ipcRenderer.send("toggle-sync", enable);
+    },
+
     getCurrencyData: async () => {
         if (currencyData !== null) {
             return currencyData

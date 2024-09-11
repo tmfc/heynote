@@ -121,9 +121,13 @@ contextBridge.exposeInMainWorld("heynote", {
 
     async getVersion() {
         return await ipcRenderer.invoke("getVersion")
-    }
-})
+    },
 
+    toggleSync(enable) {
+        console.log("preload toggleSync", enable);
+        ipcRenderer.invoke("toggle-sync", enable);
+    },
+})
 
 function domReady(condition: DocumentReadyState[] = ['complete', 'interactive']) {
     return new Promise((resolve) => {

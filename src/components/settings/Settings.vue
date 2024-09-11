@@ -60,6 +60,7 @@
                 systemFonts: [[defaultFontFamily, defaultFontFamily + " (default)"]],
                 defaultFontSize: defaultFontSize,
                 appVersion: "",
+                initialEnableSync: this.initialSettings.enableSync,
                 enableSync: this.initialSettings.enableSync,
                 remoteDbUrl: this.initialSettings.remoteDbUrl,
                 remoteDbUsername: this.initialSettings.remoteDbUsername,
@@ -81,6 +82,10 @@
         },
         beforeUnmount() {
             window.removeEventListener("keydown", this.onKeyDown);
+            if (this.initialEnableSync !== this.enableSync) {
+                console.log("toggleSync on unmount", this.enableSync);
+                window.heynote.toggleSync(this.enableSync);
+            }
         },
         computed: {
             className() {
@@ -98,6 +103,7 @@
             },
 
             updateSettings() {
+                const previousEnableSync = this.initialEnableSync;
                 window.heynote.setSettings({
                     showLineNumberGutter: this.showLineNumberGutter,
                     showFoldGutter: this.showFoldGutter,
@@ -121,6 +127,9 @@
                     remoteDbUsername: this.remoteDbUsername,
                     remoteDbPassword: this.remoteDbPassword,
                 })
+                console.log("updateSettings", this.enableSync, previousEnableSync);
+
+                
                 if (!this.showInDock) {
                     this.showInMenu = true
                 }

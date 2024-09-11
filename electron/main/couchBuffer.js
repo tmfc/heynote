@@ -15,6 +15,7 @@ db.getIndexes().then(result => {
         });
     }
 });
+var syncHandler = null;
 
 export class Buffer {
     constructor({ onChange }) {
@@ -24,9 +25,99 @@ export class Buffer {
         
         this.currentNoteIndex = CONFIG.get("noteIndex");
         this.enableSync = CONFIG.get("settings.enableSync"); // 获取同步功能设置
-        this.sync().then(handler => {this.syncHandler = handler;});
+        if (this.enableSync) {
+            this.startSync();
+        }
         
         this.delim = '\n∞∞∞';
+    }
+
+    async startSync() {
+        
+        this.enableSync = true;
+        console.log("startSync", syncHandler);
+        if (syncHandler) {
+            syncHandler.cancel();
+        }
+        await this.sync();
+        console.log("startSync end", syncHandler);
+    }
+
+    stopSync() {
+        this.enableSync = false;
+        console.log("stopSync", syncHandler);
+        if (syncHandler) {
+            syncHandler.cancel();
+            syncHandler = null;
+        }
+        console.log("stopSync end", syncHandler);
+    }
+
+    async sync() {
+        if (!this.enableSync) {
+            console.log("Sync is disabled.");
+            return; // 如果未启用同步，则返回
+        }
+
+        // 同步本地数据库与远程数据库
+        const remoteDbUrl = CONFIG.get("settings.remoteDbUrl");
+        const remoteDbUsername = CONFIG.get("settings.remoteDbUsername");
+        const remoteDbPassword = CONFIG.get("settings.remoteDbPassword");
+        const remoteDb = new PouchDB(remoteDbUrl, {
+            auth: {
+                username: remoteDbUsername,
+                password: remoteDbPassword
+            }
+        });
+
+        syncHandler = db.sync(remoteDb, {
+            live: true,
+            retry: true
+        }).on('change', async (info) => {
+            if(info.direction == 'pull')
+            {
+                // 检查从远程服务器获取到的新 block 中有没有 note_id 是当前文档的
+                const newBlocks = info.change.docs;
+                const currentNoteId = this.currentNoteIndex;
+                const currentNoteUpdated = newBlocks.some(block => block.note_id === currentNoteId);
+                if (currentNoteUpdated) {
+                    console.log("当前文档被更像了");
+                    // 在界面上弹出一个提示，提示用户有新的内容
+                    const notification = new Notification({
+                        title: '从远程服务器获取到新内容',
+                        body: '点击刷新笔记',
+                        icon: 'path/to/icon.png', // 可选
+                    });
+                
+                    notification.on('click', () => {
+                        // 刷新笔记
+                        this.load().then(result => {
+                            this.onChange(result);
+                            notification.close();
+                        });
+                    });
+                
+                    notification.on('close', () => {
+                        console.log('通知被关闭！');
+                    });
+                
+                    notification.show();
+                }
+
+                // 获取到所有block 的 _id，保存到 this.newBlocksFromRemote
+                this.newBlocksFromRemote = newBlocks.map(block => block._id);
+            }
+            
+        }).on('paused', (info) => {
+            console.log("Sync paused:", info);
+        }).on('active', (info) => {
+            console.log("Sync resumed:", info);
+        }).on('error', (err) => {
+            console.error("Sync error:", err);
+        });
+        
+        console.log("sync end", syncHandler);
+        return syncHandler; // 返回同步处理程序
     }
 
     async load() {
@@ -137,72 +228,6 @@ this is a new note, No.${this.currentNoteIndex}
             limit: 1 // 只需要检查是否存在，限制返回结果为1
         });
         return result.docs.length > 0; // 返回存在`与否
-    }
-
-    async sync() {
-        if (!this.enableSync) {
-            console.log("Sync is disabled.");
-            return; // 如果未启用同步，则返回
-        }
-
-        // 同步本地数据库与远程数据库
-        const remoteDbUrl = CONFIG.get("settings.remoteDbUrl");
-        const remoteDbUsername = CONFIG.get("settings.remoteDbUsername");
-        const remoteDbPassword = CONFIG.get("settings.remoteDbPassword");
-        const remoteDb = new PouchDB(remoteDbUrl, {
-            auth: {
-                username: remoteDbUsername,
-                password: remoteDbPassword
-            }
-        });
-
-        const syncHandler = db.sync(remoteDb, {
-            live: true,
-            retry: true
-        }).on('change', async (info) => {
-            if(info.direction == 'pull')
-            {
-                // 检查从远程服务器获取到的新 block 中有没有 note_id 是当前文档的
-                const newBlocks = info.change.docs;
-                const currentNoteId = this.currentNoteIndex;
-                const currentNoteUpdated = newBlocks.some(block => block.note_id === currentNoteId);
-                if (currentNoteUpdated) {
-                    console.log("当前文档被更像了");
-                    // 在界面上弹出一个提示，提示用户有新的内容
-                    const notification = new Notification({
-                        title: '从远程服务器获取到新内容',
-                        body: '点击刷新笔记',
-                        icon: 'path/to/icon.png', // 可选
-                    });
-                
-                    notification.on('click', () => {
-                        // 刷新笔记
-                        this.load().then(result => {
-                            this.onChange(result);
-                            notification.close();
-                        });
-                    });
-                
-                    notification.on('close', () => {
-                        console.log('通知被关闭！');
-                    });
-                
-                    notification.show();
-                }
-
-                // 获取到所有block 的 _id，保存到 this.newBlocksFromRemote
-                this.newBlocksFromRemote = newBlocks.map(block => block._id);
-            }
-            
-        }).on('paused', (info) => {
-            // console.log("Sync paused:", info);
-        }).on('active', (info) => {
-            // console.log("Sync resumed:", info);
-        }).on('error', (err) => {
-            // console.error("Sync error:", err);
-        });
-        
-        return syncHandler; // 返回同步处理程序
     }
 
     async testConnection(url, username, password) {
