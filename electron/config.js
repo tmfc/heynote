@@ -55,6 +55,7 @@ const schema = {
             "defaultBlockLanguage": {type: "string"},
             "defaultBlockLanguageAutoDetect": {type: "boolean"},
             "spellcheckEnabled": {type: "boolean", default:false},
+            "showWhitespace": {type:"boolean", default:false},
 
             // when default font settings are used, fontFamily and fontSize is not specified in the 
             // settings file, so that it's possible for us to change the default settings in the 
@@ -138,6 +139,7 @@ const defaults = {
         noteMateBaseUrl: "http://localhost:80",
         noteMateUserId: "tmfc",
         noteMateSidebarHotkey: "",
+        showWhitespace: false,
     },
     theme: "system",
 }

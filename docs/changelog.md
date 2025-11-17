@@ -2,8 +2,20 @@
 
 Here are the most notable changes in each release. For a more detailed list of changes, see the [Github Releases page](https://github.com/heyman/heynote/releases).
 
-## 2.6.0 (not yet released)
+## 2.6.2
 
+- Update to latest version of Electron to fix issue making Heynote unusable on latest version of Mac OS (Tahoe)
+- Fix issue that would break Math blocks with a large number of lines (the parser would not start processing 
+  rows from the beginning of the block)
+- Fix issue with not being able to hide window after toggling alwaysOnTop (on Mac)
+
+## 2.6.1
+
+- Fix crash when no custom key binding had been set
+
+## 2.6.0
+
+- Add setting for rendering white-space (spaces as dots and tabs as arrows)
 - Show key bindings in Command Palette
 - When displaying key bindings show shorter version with ⇧, ⌘, ⌥, etc instead of Shift, Cmd, Alt, etc
 - Fixed so that tooltips displays new key binding if the default have been overridden

@@ -214,6 +214,7 @@ function getCombinedKeymapSpec(keymapName, userKeymap) {
     const safeUserKeymap = Array.isArray(userKeymap) ? userKeymap : []
     return [
         ...safeUserKeymap,
+        ...(userKeymap ? userKeymap : []),
         ...(keymapName === "emacs" ? [...EMACS_KEYMAP, ...DEFAULT_KEYMAP] : [...DEFAULT_NOT_EMACS_KEYMAP, ...DEFAULT_KEYMAP]),
     ]
 }
