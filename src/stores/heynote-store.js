@@ -6,6 +6,7 @@ import {
     SCRATCH_FILE_NAME, WINDOW_FULLSCREEN_STATE, WINDOW_FOCUS_STATE, 
     SAVE_TABS_STATE, LOAD_TABS_STATE, CONTEXT_MENU_CLOSED 
 } from "../common/constants"
+import { useSettingsStore } from "./settings-store"
 
 
 export const useHeynoteStore = defineStore("heynote", {
@@ -34,6 +35,12 @@ export const useHeynoteStore = defineStore("heynote", {
         showEditBuffer: false,
         showMoveToBufferSelector: false,
         showCommandPalette: false,
+
+        // AI Panel
+        showAIPanel: false,
+        aiMessages: [], // {role: 'user'|'assistant', content: string}
+        aiInput: "",
+        aiThreadId: null, // 当前会话使用的 thread_id，用于携带上下文
 
         isFullscreen: false,
         isFocused: true,
@@ -183,6 +190,131 @@ export const useHeynoteStore = defineStore("heynote", {
             this.closeDialog()
             this.showCommandPalette = true
         },
+        openAIPanel(initialText) {
+            // do not call closeDialog() to keep editor focus context; but ensure other modals are closed
+            this.showCreateBuffer = false
+            this.showBufferSelector = false
+            this.showLanguageSelector = false
+            this.showEditBuffer = false
+            this.showMoveToBufferSelector = false
+            this.showCommandPalette = false
+
+            this.aiInput = initialText || ""
+            this.showAIPanel = true
+        },
+        closeAIPanel() {
+            this.showAIPanel = false
+            this.focusEditor()
+        },
+        async aiSend() {
+            const text = (this.aiInput || "").trim()
+            if (!text) return
+            this.aiMessages.push({ role: 'user', content: text })
+            this.aiInput = ""
+
+            // Prepare payload according to note-mate schema
+            const settingsStore = useSettingsStore()
+
+            // 如果当前还没有 threadId，则生成一个新的，用于后续消息复用上下文
+            if (!this.aiThreadId) {
+                try {
+                    this.aiThreadId = (window.crypto && window.crypto.randomUUID)
+                        ? window.crypto.randomUUID()
+                        : `heynote-${Date.now()}-${Math.random().toString(16).slice(2)}`
+                } catch (e) {
+                    this.aiThreadId = `heynote-${Date.now()}-${Math.random().toString(16).slice(2)}`
+                }
+            }
+            const payload = {
+                message: text,
+                images: [],
+                model: 'gpt-4o-mini',
+                thread_id: this.aiThreadId,
+                stream_tokens: true,
+                platform: 'heynote',
+                platform_id: settingsStore?.settings?.noteMateUserId || 'tmfc',
+            }
+
+            // Streaming placeholder (non-empty so用户能看到正在生成)
+            const pending = { role: 'assistant', content: '…' }
+            this.aiMessages.push(pending)
+
+            try {
+                const token = settingsStore?.settings?.noteMateAuthToken || ""
+                const base = (settingsStore?.settings?.noteMateBaseUrl || 'http://localhost:80').replace(/\/$/, '')
+                console.debug('[AI] POST /stream start', base)
+                const resp = await fetch(`${base}/stream`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(token ? { 'X-API-Key': token, 'Authorization': `Bearer ${token}` } : {}),
+                    },
+                    body: JSON.stringify(payload),
+                })
+                if (!resp.ok || !resp.body) {
+                    console.error('[AI] /stream failed', resp.status, resp.statusText)
+                    pending.content = `请求失败：${resp.status} ${resp.statusText}`
+                    return
+                }
+                const reader = resp.body.getReader()
+                const decoder = new TextDecoder('utf-8')
+                let buffer = ''
+                let finished = false
+                while (true) {
+                    const { value, done } = await reader.read()
+                    if (done) break
+                    // Normalize CRLF to LF
+                    buffer += decoder.decode(value, { stream: true }).replace(/\r\n/g, "\n")
+                    // SSE events separated by blank line
+                    let idx
+                    while ((idx = buffer.indexOf("\n\n")) !== -1) {
+                        const chunk = buffer.slice(0, idx)
+                        buffer = buffer.slice(idx + 2)
+                        const lines = chunk.split("\n")
+                        for (const l of lines) {
+                            if (!l.startsWith('data:')) continue
+                            const dataStr = l.slice(5).trim()
+                            if (!dataStr) continue
+                            if (dataStr === '[DONE]') {
+                                // finish current event batch
+                                finished = true
+                                continue
+                            }
+                            try {
+                                const evt = JSON.parse(dataStr)
+                                if (evt.type === 'token') {
+                                    const t = evt.content || ''
+                                    pending.content += t
+                                    // force reactive update
+                                    this.aiMessages = [...this.aiMessages]
+                                    // eslint-disable-next-line no-console
+                                    console.debug('[AI] token', t)
+                                } else if (evt.type === 'message') {
+                                    const msg = evt.content || {}
+                                    const finalText = msg.content || ''
+                                    if (finalText) pending.content = finalText
+                                    // force reactive update
+                                    this.aiMessages = [...this.aiMessages]
+                                    console.debug('[AI] message', msg)
+                                }
+                            } catch (e) {
+                                // ignore malformed json lines
+                                console.warn('[AI] parse error', e)
+                            }
+                        }
+                        if (finished) break
+                    }
+                }
+                console.debug('[AI] /stream end')
+            } catch (e) {
+                pending.content = `调用出错：${e?.message || e}`
+            }
+        },
+
+        // 清空当前对话上下文：仅重置 threadId，不清除已显示的消息
+        aiResetContext() {
+            this.aiThreadId = null
+        },
         openMoveToBufferSelector() {
             this.closeDialog()
             this.showMoveToBufferSelector = true
@@ -203,6 +335,7 @@ export const useHeynoteStore = defineStore("heynote", {
             this.showEditBuffer = false
             this.showMoveToBufferSelector = false
             this.showCommandPalette = false
+            this.showAIPanel = false
         },
 
         closeBufferSelector() {

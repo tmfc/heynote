@@ -72,6 +72,11 @@ const schema = {
                     regexp: {type: "boolean"},
                 },
             },
+            // Backend integration
+            "noteMateAuthToken": { type: "string", default: "" },
+            "noteMateBaseUrl": { type: "string", default: "http://localhost:80" },
+            "noteMateUserId": { type: "string", default: "tmfc" },
+            "noteMateSidebarHotkey": { type: "string", default: "" },
         },
     },
 
@@ -130,6 +135,10 @@ const defaults = {
             regexp: false,
         },
         spellcheckEnabled: false,
+        noteMateAuthToken: "",
+        noteMateBaseUrl: "http://localhost:80",
+        noteMateUserId: "tmfc",
+        noteMateSidebarHotkey: "",
         showWhitespace: false,
     },
     theme: "system",
